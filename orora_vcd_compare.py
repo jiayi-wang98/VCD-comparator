@@ -39,13 +39,24 @@ def main():
             file_2=args[1]
 
         signal_map={}
+
+        timescale=str()
+        timescale="Unknown"
         #read in signal definition
         with open(file_1) as file_signal:
             line = file_signal.readline()
             while(line):
                 words=line.split()
                 if(len(words)>0):
-                    if(words[0]=="$var"):
+                    if(words[0]=="$timescale"):
+                        if(len(words)>1):
+                            timescale=words[1]
+                        else:
+                            line = file_signal.readline()
+                            words=line.split()
+                            if(len(words)>0):
+                                timescale=words[0]
+                    elif(words[0]=="$var"):
                         if(words[3] in signal_map):
                             signal_map[words[3]].append(words[4])
                         else:
@@ -223,7 +234,7 @@ def main():
                                     signal_to_be_inspect.remove(words2[0][1:])
                                     signal_diff_ts[words2[0][1:]]=ts_2
                                     error_count+=1
-                                    print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                    print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "*",timescale,"]")
                                     print(" ")
                                 else:
                                     signal_val_2[words2[0][1:]]=words2[0][0]
@@ -234,7 +245,7 @@ def main():
                                     signal_to_be_inspect.remove(words2[1])
                                     signal_diff_ts[words2[1]]=ts_2
                                     error_count+=1
-                                    print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                    print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                     print(" ")
                                 else:
                                     signal_val_2[words2[1]]=words2[0]
@@ -268,10 +279,6 @@ def main():
 
                 while(len(signal_to_be_inspect)>0 and (file_1_line or file_2_line)):
                 #some changes in file1 do not happen in file2
-
-                    #print(iter,signal_to_be_inspect)
-                    #print(ts_1,ts_2)
-                    iter+=1
                     
                     if(ts_1<ts_2):
                         #print("ts_1<ts_2")
@@ -293,7 +300,7 @@ def main():
                                         signal_diff_ts[words1[0][1:]]=ts_1
                                         error_count+=1
                                         print("VCDFILE 1, SIGNAL CHANGES TOO EARLY")
-                                        print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                        print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                         print("in vcd_file_1, it changed to ",words1[0][0] )
                                         print("while in vcd_file_2, it remained the same value as before")
                                         print(" ")
@@ -303,13 +310,13 @@ def main():
                                         signal_diff_ts[words1[1]]=ts_1
                                         error_count+=1
                                         print("VCDFILE 1, SIGNAL CHANGES TOO EARLY")
-                                        print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                        print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                         print("in vcd_file_1, it changed to ",words1[0] )
                                         print("while in vcd_file_2, it remained the same value as before")
                                         print(" ")
                                 file_1_line = file_1.readline()
                                 words1=file_1_line.split()
-                            break
+                            continue
 
                         #if ts_1>=ts_2   
                         #update value in signal_val
@@ -327,7 +334,7 @@ def main():
                                                 signal_diff_ts[words1[0][1:]]=ts_2
                                                 error_count+=1
                                                 print("VCDFILE 1, SIGNAL CHANGES TOO LATE")
-                                                print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                                print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words1[0][1:]] )
                                                 print("while in vcd_file_2, it's ",signal_val_2[words1[0][1:]] )
                                                 print(" ")
@@ -342,7 +349,7 @@ def main():
                                                 signal_diff_ts[words1[0][1:]]=ts_1
                                                 error_count+=1
                                                 print("VCDFILE 1, SIGNAL CHANGES TO A DIFFERENT VALUE")
-                                                print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                                print(signal_map[words1[0][1:]], "is different from two vcd files at timestamp [", ts_1,  "*",timescale,"]")
                                                 print("in vcd_file_2, it's ",signal_val_2[words1[0][1:]] )
                                                 print("while in vcd_file_1, it's ",words1[0][0])
                                                 print(" ")
@@ -364,7 +371,7 @@ def main():
                                                 signal_diff_ts[words1[1]]=ts_2
                                                 error_count+=1
                                                 print("VCDFILE 1, SIGNAL CHANGES TOO LATE")
-                                                print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                                print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words1[1]] )
                                                 print("while in vcd_file_2, it's ",signal_val_2[words1[1]] )
                                                 print(" ")
@@ -379,7 +386,7 @@ def main():
                                                 signal_diff_ts[words1[1]]=ts_1
                                                 error_count+=1
                                                 print("VCDFILE 1, SIGNAL CHANGES TO A DIFFERENT VALUE")
-                                                print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                                print(signal_map[words1[1]], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                                 print("in vcd_file_2, it's ",signal_val_2[words1[1]] )
                                                 print("while in vcd_file_1, it's ",words1[0] )
                                                 print(" ")
@@ -392,7 +399,9 @@ def main():
                             #print("file1_line_number=",file1_line_num)
                             if(file_1_line):
                                 words1=file_1_line.split()
-                            else:break
+                            else:
+                                print("VCD 1 FINISH")
+                                break
 
                         #inspect other signals that does not change
                         while(len(check_signals)>0):
@@ -404,7 +413,7 @@ def main():
                                     signal_diff_ts[signal]=ts_1
                                     error_count+=1
                                     print("VCDFILE 2, SIGNAL DOES NOT CHANGE")
-                                    print(signal_map[signal], "is different from two vcd files at timestamp [", ts_1, "]")
+                                    print(signal_map[signal], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                     print("in vcd_file_1, it's ",signal_val_1[signal] )
                                     print("while in vcd_file_2, it's ",signal_val_2[signal] )
                                     print(" ")
@@ -439,7 +448,7 @@ def main():
                             if(file_1_line):
                                 words1=file_1_line.split()
                             else:
-                                #print("VCD FINISH")
+                                print("VCD 1 FINISH")
                                 break
 
                     #check file2 tb
@@ -464,7 +473,7 @@ def main():
                                         signal_diff_ts[words2[0][1:]]=ts_2
                                         error_count+=1
                                         print("VCDFILE 2, SIGNAL CHANGES TOO EARLY")
-                                        print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                        print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                         print("in vcd_file_2, it changed to ",words2[0][0] )
                                         print("while in vcd_file_1, it remained the same value as before")
                                         print(" ")
@@ -474,7 +483,7 @@ def main():
                                         signal_diff_ts[words2[1]]=ts_2
                                         error_count+=1
                                         print("VCDFILE 2, SIGNAL CHANGES TOO EARLY")
-                                        print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                        print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                         print("in vcd_file_2, it changed to ",words2[0] )
                                         print("while in vcd_file_1, it remained the same value as before")
                                         print(" ")
@@ -498,7 +507,7 @@ def main():
                                                 signal_diff_ts[words2[0][1:]]=ts_1
                                                 error_count+=1
                                                 print("VCDFILE 2, SIGNAL CHANGES TOO LATE")
-                                                print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                                print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words2[0][1:]] )
                                                 print("while in vcd_file_2, it's ",signal_val_2[words2[0][1:]] )
                                                 print(" ")
@@ -513,7 +522,7 @@ def main():
                                                 signal_diff_ts[words2[0][1:]]=ts_2
                                                 error_count+=1
                                                 print("VCDFILE 2, SIGNAL CHANGES TO A DIFFERENT VALUE")
-                                                print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                                print(signal_map[words2[0][1:]], "is different from two vcd files at timestamp [", ts_2, "*",timescale, "]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words2[0][1:]] )
                                                 print("while in vcd_file_2, it's ",words2[0][0])
                                                 print(" ")
@@ -535,7 +544,7 @@ def main():
                                                 signal_diff_ts[words2[1]]=ts_1
                                                 error_count+=1
                                                 print("VCDFILE 2, SIGNAL CHANGES TOO LATE")
-                                                print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_1, "]")
+                                                print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_1,  "*",timescale,"]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words2[1]] )
                                                 print("while in vcd_file_2, it's ",signal_val_2[words2[1]] )
                                                 print(" ")
@@ -550,7 +559,7 @@ def main():
                                                 signal_diff_ts[words2[1]]=ts_2
                                                 error_count+=1
                                                 print("VCDFILE 2, SIGNAL CHANGES TO A DIFFERENT VALUE")
-                                                print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2, "]")
+                                                print(signal_map[words2[1]], "is different from two vcd files at timestamp [", ts_2,  "*",timescale,"]")
                                                 print("in vcd_file_1, it's ",signal_val_1[words2[1]] )
                                                 print("while in vcd_file_2, it's ",words2[0] )
                                                 print(" ")
@@ -564,7 +573,7 @@ def main():
                             if(file_2_line):
                                 words2=file_2_line.split()
                             else:
-                                #print("VCD FINISH")
+                                print("VCD 2 FINISH")
                                 break
 
                         #inspect other signals that does not change
@@ -578,16 +587,22 @@ def main():
                                     signal_diff_ts[signal]=ts_1
                                     error_count+=1
                                     print("VCDFILE 2, SIGNAL DOES NOT CHANGE")
-                                    print(signal_map[signal], "is different from two vcd files at timestamp [", ts_1, "]")
+                                    print(signal_map[signal], "is different from two vcd files at timestamp [", ts_1, "*",timescale, "]")
                                     print("in vcd_file_1, it's ",signal_val_1[signal] )
                                     print("while in vcd_file_2, it's ",signal_val_2[signal] )
                                     print(" ")
+
+
+                    #print(iter,len(signal_to_be_inspect))
+                    #print(ts_1,ts_2)
+                    iter+=1
                     #print("current_line = ", file1_line_num, file2_line_num)    
         if(error_count==0):
             print("The selected waveforms are the same. ")
         else:
             print("There are ", error_count," differences in the waveform !")
-
+        print("Timescale is ", timescale)
+        print("Last timestamps are ts_1=",ts_1,"    ts_2=",ts_2)
 
 if __name__ == "__main__":
     main()
